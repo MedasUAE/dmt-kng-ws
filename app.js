@@ -2,7 +2,7 @@ var restify = require('restify');
 var plugins = require('restify').plugins;
 const corsMiddleware = require('restify-cors-middleware')
  var config = require('./config/config');
-
+ 
 // server started
 var server = restify.createServer({
     name: 'docAPI',

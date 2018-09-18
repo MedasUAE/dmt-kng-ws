@@ -1,11 +1,17 @@
 var db_query = require('../db/executeQuery');
-const fs = require('fs');
 var mysql = require('mysql');
 var hdb = require('hdb');
 mysqlCon="";
 hanaCon="";
 mysqlDatabase="";
 hanaDatabase="";
+//logging
+const log4js = require('log4js');
+log4js.configure({
+  appenders: { mysqlToHana: { type: 'file', filename: './logs/ErrorLog.log' } },
+  categories: { default: { appenders: ['mysqlToHana'], level: 'debug' } }
+});
+const logger = log4js.getLogger('mysqlToHana');
 
 const mySQLParams = {
     SMALLINT:/smallint[(]+[0-9]+[)]/g,
@@ -24,7 +30,8 @@ const mySQLParams = {
     DOUBLE: /double/g,
     BIGINTEGER: /bigint[(]+[0-9]+[)]/g,
     DOUBLE: /double/g,
-    TINYINTEGER: /tinyint[(]+[0-9]+[)]/g
+    TINYINTEGER: /tinyint[(]+[0-9]+[)]/g,
+   
 }
 
 const hanaSQLParams = {
@@ -40,6 +47,10 @@ const hanaSQLParams = {
     BIGINT: 'BIGINT',
     TINYINT: 'TinyINT',
     BLANK: '',
+    //custom Type
+    TINYTEXT: "VARCHAR(255)",
+    LONGTEXT: "BLOB"
+   
 }
 
 async function getMysqlConnection(connectionParams,next){
@@ -52,7 +63,6 @@ async function getMysqlConnection(connectionParams,next){
         database:connectionParams.db
     }
   
-
 //Mysql  Database connection
 mysqlCon = mysql.createConnection(dbObject);
 this.mysqlCon=mysqlCon;
@@ -61,8 +71,7 @@ mysqlCon.connect((err) => {
     "taskName":"mysqlConnection"
     };   
     if (err) {
-        fs.appendFileSync("./sql/connection/Connection_ErrorLog",new Date()+ " Method Name getMysqlConnection \n"+ err +"\n"); 
-     
+        logger.error(err);
         responseMessage= {
             "errorCode": err.code,
             "errNo": err.errno,
@@ -70,6 +79,7 @@ mysqlCon.connect((err) => {
         }
         return next(responseMessage);
     } 
+    logger.info('Coonected To Mysql DB:',dbObject.database);
       return next(null,responseMessage);
 });
 
@@ -93,13 +103,14 @@ function getHanaConnection(connectionParams,next){
         "taskName":"hanaConnection"
         };
      if (err){
-        fs.appendFileSync("./sql/connection/Connection_ErrorLog",new Date()+ " Method Name getHanaConnection \n"+ err +"\n"); 
+        logger.error(err);
         responseMessage= {
             "errorCode": err.code,
             "taskName":""  
         }
         return next(responseMessage);
      } 
+     logger.info('Connected to SAP HANA DB:',dbObject.database);
        return next(null,responseMessage);
  });
 
@@ -117,28 +128,47 @@ function showTableNames(){
     });
 }
 
-async function createtables(selectedtableNameObjs,next){
-    let responseMessage= {
+async function createtables(selectedtableNameObjsAndRemoveExistingFlag,next){
+     let responseMessage= {
         "taskName":"createTables"
         };
-     await done(selectedtableNameObjs,this.hanaDatabase);
-      next(null,responseMessage);
+        tableNameObjs= await selectedtableNameObjsAndRemoveExistingFlag[0];
+        isRemoveExistingTables= await selectedtableNameObjsAndRemoveExistingFlag[1];
+      await done(tableNameObjs,isRemoveExistingTables,this.hanaDatabase);
+       next(null,responseMessage);
+     
+  
   
 }
 
-function done(selectedtableNameObjs,hanaDatabase){
+
+function dropTable(hanaDatabase,tableName,isRemoveExistingTables, next){
+    let query = "DROP TABLE "+ hanaDatabase.toUpperCase()+"."+tableName.toUpperCase();
+    if(isRemoveExistingTables){
+     hanaCon.exec(query, function (dropErr, affectedRows) {
+        if(dropErr) {
+            if(dropErr.code===259)  next(); //259 -> invalid table name-> Table not exist in DB
+        } else {
+            next();
+        }
+     });
+    } else {
+        next();
+    }
+}
+
+function done(selectedtableNameObjs,isRemoveExistingTables,hanaDatabase){
     let failCount=0;
     let successCount=0;
-
-    selectedtableNameObjs.forEach(async (tableObj) => {
-     // let createStatement = 'CREATE COLUMN TABLE "' + config.db.database + '"."' + table[columnName] + '" (\n',
+     selectedtableNameObjs.forEach(async (tableObj) => {
+       // let createStatement = 'CREATE COLUMN TABLE "' + config.db.database + '"."' + table[columnName] + '" (\n',
         let createStatement = 'CREATE COLUMN TABLE "' + hanaDatabase.toUpperCase() + '"."' + tableObj.itemName.toUpperCase() + '" (\n',
         keys = [];
         try {
             columns = await showTableColumn(tableObj["itemName"]);
           } catch (error) {
-              fs.appendFileSync("./sql/create/Create_ErrorLog",new Date()+ " Method Name done \n"+  error +"\n");    
-        }
+            logger.error(error);
+          }
         if(Array.isArray(columns)){
                columns.forEach(col=>{
                 createStatement = createStatement + hanaColumnDefinition(col).trim() + ',\n';
@@ -147,22 +177,22 @@ function done(selectedtableNameObjs,hanaDatabase){
               if(keys.length)
                 createStatement = createStatement + 'PRIMARY KEY ("' + keys.join("\",\"") +'"),\n';
             createStatement = createStatement.substring(0, createStatement.length - 2) + ");\n";
-            hanaCon.exec(createStatement, function (err) {
-               
-                if (err) {
-                 failCount++;
-                  fs.appendFileSync("./sql/create/Create_ErrorLog",new Date()+ " Method Name exec \n"+ "Fail Count: "+failCount  +  err +"\n"+createStatement+"\n"); 
-                     } else {
-                    successCount++;
-                    fs.appendFileSync("./sql/create/Create_ErrorLog",new Date()+" Method Name exec \n"+ "Success Count: "+successCount  +  "Table " +tableObj.itemName + "   has been created" +"\n"); 
-                
-                }
-                  
-              });
+            dropTable(hanaDatabase,tableObj.itemName.toUpperCase(),isRemoveExistingTables, (err)=>{
+                     hanaCon.exec(createStatement, function (createErr) {
+                        if (createErr) {
+                         failCount++;
+                         logger.error("Table creation fail with name : "+tableObj["itemName"]+" FailCount :"+failCount, createErr,createStatement);
+                              } else {
+                            successCount++;
+                            logger.info('Table created with name:',tableObj["itemName"]+" successCount :"+successCount);
+                          
+                        }
+                          
+                      });
+            })
+            
         } 
     });
-
-   
 }
 
 function hanaColumnDefinition(colObj){
@@ -222,8 +252,8 @@ function hanaColType(type){
     type = type.replace(mySQLParams.BIGINTEGER, hanaSQLParams.BIGINT);
     type = type.replace(mySQLParams.INT, hanaSQLParams.INTEGER);
     type = type.replace(mySQLParams.AUTO_INCREMENT, hanaSQLParams.IDENTITY)
-    type = type.replace(mySQLParams.TINYTEXT, hanaSQLParams.VARCHARTEN);
-    type = type.replace(mySQLParams.LONGTEXT, hanaSQLParams.VARCHARMAX);
+    type = type.replace(mySQLParams.TINYTEXT, hanaSQLParams.TINYTEXT);
+    type = type.replace(mySQLParams.LONGTEXT, hanaSQLParams.LONGTEXT);
     type = type.replace(mySQLParams.MEDIUMTEXT, hanaSQLParams.VARCHARMEDIUM);
     type = type.replace(mySQLParams.UNASIGNED, hanaSQLParams.BLANK);
     type = type.replace(mySQLParams.CHARACTER_SET_LATIN1, hanaSQLParams.BLANK);
@@ -241,13 +271,10 @@ function checkNotNull(nullCheck){
  async function showAllMysqlTableNames(next){
     let tables;
     try {
-       // dbConn = await dbConnect();
-
         tables = await showTableNames();
-       
+ 
     } catch (error) {
-        fs.appendFileSync("./sql/create/Create_ErrorLog",new Date()+ "method Name showAllMysqlTableNames \n"+ error +"\n"); 
-      
+        logger.error(error);
         //dbDisconnect();
         //return next(error);
         // LOG ERROR
@@ -255,30 +282,33 @@ function checkNotNull(nullCheck){
     return next(null,tables);
 }
 
-async function insertDataInTables(selectedTableNames,next){
+async function insertDataInTables(reqBody,next){
+   let tableNameObjs= await reqBody[0];
+   let isRemoveExistingRecords= await reqBody[1];
+    let tableCount=0;
     let responseMessage= {
         "taskName":"insertData"
         };
-        for (const tableNameObj of selectedTableNames) {
-         const done = await insertDataInSingleTable(tableNameObj.itemName,this.mysqlDatabase,this.hanaDatabase);
+        for (const tableNameObj of tableNameObjs) {
+            tableCount++;
+         const done = await insertDataInSingleTable(tableNameObj.itemName,this.mysqlDatabase,this.hanaDatabase,isRemoveExistingRecords,tableCount);
         }
        
        await next(null,responseMessage);
      }
 
 
-  async  function insertDataInSingleTable(tableName,mysqlDatabase,hanaDatabase){
-  
-         startTimeInMs=  Date.now();
+  async  function insertDataInSingleTable(tableName,mysqlDatabase,hanaDatabase,isRemoveExistingRecords,tableCount){
          try {
             columns =  await showTableColumn(tableName);
+            
             data = await getResult(tableName,mysqlDatabase);
               insertQueries = await createInsertQuery(tableName,columns,data,hanaDatabase);
-              executeInsertQuery(tableName,insertQueries);
+             executeInsertQuery(hanaDatabase,tableName,insertQueries,isRemoveExistingRecords,tableCount);
          
         } catch (error) {
-         fs.appendFileSync("./sql/data/Data_ErrorLog",new Date()+ "Method Name insertDataInSingleTable \n"+ error +"\n"); 
-         }
+             logger.error(error);
+          }
       return "done";
      
 }
@@ -293,30 +323,48 @@ function getResult(tableName,mysqlDatabase){
        })
    });
 }
-  function executeInsertQuery(tableName,insertQueries){
-       let totalCount=0;
-       let failCount=0;
-         for (let i = 0; i < insertQueries.length; i++) {
-               totalCount++;
-               hanaCon.exec(insertQueries[i], function (err, affectedRows) {
-                   if(err) {
-                      failCount++;
-                      fs.appendFileSync("./sql/data/"+tableName+".sql",new Date()+ " method name executeInsertQuery \n"+"FailCount: "+failCount  +  err +"\n"+insertQueries+"\n"); 
-                
-                   }
-           });
-              
-       }
-      let totalTime=(Date.now()-startTimeInMs)/1000;
-    fs.appendFileSync("./sql/data/"+tableName+".sql",new Date()+" method name executeInsertQuery \n"+"TotalCount:"+totalCount+"\n"+"FailCount:"+failCount+"\n"+"TotalTime:"+totalTime+"\n");         
+  function executeInsertQuery(hanaDatabase,tableName,insertQueries,isRemoveExistingRecords,tableCount){
+   let failCount=0;
+     truncateTable(hanaDatabase,tableName,isRemoveExistingRecords, (err)=>{
+        if(!err){
+            logger.info("Inserted  data in table :"+tableName+"  TableCount:"+tableCount);
+            for (let i = 0; i < insertQueries.length; i++) {
+                    hanaCon.exec(insertQueries[i], function (err, affectedRows) {
+                    if(err) {
+                       failCount++;
+                       logger.error("Insert Failed:", err,insertQueries[i]+ " FailCount :"+failCount);
+                    } 
+                 });
+            }
+
+        }   
+    })
+   }
+
+function truncateTable(hanaDatabase,tableName,isRemoveExistingRecords, next){
+    let query = "TRUNCATE TABLE "+ hanaDatabase.toUpperCase()+"."+tableName.toUpperCase();
+if(isRemoveExistingRecords){
+    hanaCon.exec(query, function (err, affectedRows) {
+        if(err) {
+            logger.error("Trncate Failed", err, query);
+            next(err)
+        } else {
+            next();
+        }
+       
+     });
+} else {
+    next();
+}
+   
 }
 
-function createInsertQuery(tableName,colunms, data,hanaDatabase){
+ function createInsertQuery(tableName,colunms, data,hanaDatabase){
    let insertQueryArr=[];
    return new Promise((resolve,reject)=>{
        data.forEach((row)=>{
        let insertQuery = "INSERT INTO "+ hanaDatabase.toUpperCase()+"."+tableName.toUpperCase()+" VALUES " + loopOnColumns(row,colunms);
-       insertQueryArr.push(insertQuery);
+        insertQueryArr.push(insertQuery);
            
    });
    return resolve(insertQueryArr);
@@ -328,16 +376,55 @@ function loopOnColumns(row,colunms){
    let index=-1;
    for(col in row){
        index++;
-       if(colunms[index].Type.startsWith('varchar')) {
-        insertValues = insertValues + "'" + row[col] + "',"
-       }
-       else {
-            insertValues = insertValues + row[col] + "," 
+        if(colunms[index].Type.startsWith('varchar')) {
+       insertValues = insertValues + "'" + replaceAll(row[col],"'", "") + "',"
+       insertValues =insertValues.replace("undefined", "null");
+       } else if(colunms[index].Type.startsWith('text')) {
+        insertValues = insertValues + "'" + replaceAll(row[col],"'", "") + "',"
+        insertValues =insertValues.replace("undefined", "null");
+       } else if(colunms[index].Type.startsWith('datetime')) {
+        insertValues = insertValues + "'"  + formatDateToMMMMYYDD(row[col]) + "',"
+        insertValues =insertValues.replace("undefined", "null");
+       } else if(colunms[index].Type.startsWith('date')) {
+        insertValues = insertValues + "'"  + formatDateToMMMMYYDD(row[col]) + "',"
+        insertValues =insertValues.replace("undefined", "null");
+        } else if(colunms[index].Type.startsWith('mediumtext')) {
+        insertValues = insertValues + "'" + replaceAll(row[col],"'", "") + "',"
+        insertValues =insertValues.replace("undefined", "null");
+       } else if(colunms[index].Type.startsWith('tinytext')) {
+        insertValues = insertValues + "'" + replaceAll(row[col],"'", "") + "',"
+        insertValues =insertValues.replace("undefined", "null");
+       } else if(colunms[index].Type.startsWith('longtext')) {
+        insertValues = insertValues + "'" + replaceAll(row[col],"'", "") + "',"
+        insertValues =insertValues.replace("undefined", "null");
+       } else {
+            insertValues = insertValues + row[col] + ","
+            insertValues =insertValues.replace("undefined", "null");
            }
    }
 
    insertValues=insertValues.substring(0, insertValues.length-1);
    return insertValues + ");"
+}
+
+function replaceAll(str, find, replace) {
+
+if(str!=null){
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+   
+}
+
+function formatDateToMMMMYYDD(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
 }
 
 function showTableColumn(table){
@@ -352,12 +439,10 @@ function showTableColumn(table){
    });
 }
 
- 
 exports.getMysqlConnection = getMysqlConnection;
 exports.getHanaConnection = getHanaConnection;
 exports.showAllMysqlTableNames = showAllMysqlTableNames;
 exports.createtables = createtables;
 exports.insertDataInTables = insertDataInTables;
-
 
 
