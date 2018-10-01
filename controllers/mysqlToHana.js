@@ -8,10 +8,10 @@ hanaDatabase="";
 //logging
 const log4js = require('log4js');
 log4js.configure({
-  appenders: { mysqlToHana: { type: 'file', filename: './logs/ErrorLog.log' } },
-  categories: { default: { appenders: ['mysqlToHana'], level: 'debug' } }
+  appenders: { mysqltohana: { type: 'file', filename: './logs/mysqltohana_ErrorLog.log' } },
+  categories: { default: { appenders: ['mysqltohana'], level: 'debug' } }
 });
-const logger = log4js.getLogger('mysqlToHana');
+const logger = log4js.getLogger('mysqltohana');
 
 const mySQLParams = {
     SMALLINT:/smallint[(]+[0-9]+[)]/g,

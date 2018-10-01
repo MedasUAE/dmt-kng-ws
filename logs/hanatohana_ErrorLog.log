@@ -1,0 +1,72 @@
+[2018-09-20T09:44:22.757] [INFO] hanatohana - Connected to SAP HANA DB: ECLINIC_KNG_TEST
+[2018-09-20T09:44:22.761] [INFO] hanatohana - Connected to SAP HANA DB: ECLINIC_KNG_NEW
+[2018-09-20T09:52:24.779] [INFO] hanatohana - Connected to SAP HANA DB: ECLINIC_KNG_NEW
+[2018-09-20T09:52:24.783] [INFO] hanatohana - Connected to SAP HANA DB: ECLINIC_KNG_TEST
+[2018-09-20T09:52:59.408] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'1\',\'Penicillin\',\'D\');'
+[2018-09-20T09:53:03.169] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'2\',\'Dilantin\',\'D\');'
+[2018-09-20T09:53:05.374] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'3\',\'Cephalosporins\',\'D\');'
+[2018-09-20T09:53:08.895] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'4\',\'Fruit\',\'O\');'
+[2018-09-20T09:53:09.820] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'5\',\'Garlic\',\'O\');'
+[2018-09-20T09:53:11.648] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'6\',\'Oats\',\'O\');'
+[2018-09-20T09:53:13.319] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'7\',\'Milk\',\'O\');'
+[2018-09-20T09:53:14.868] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'8\',\'Dolo\',\'D\');'
+[2018-09-20T09:53:19.096] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'9\',\'avil\',\'D\');'
+[2018-09-20T09:53:20.505] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'10\',\'egg\',\'O\');'
+[2018-09-20T09:53:22.586] [ERROR] hanatohana - { [Error: invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)]
+  message: 'invalid table name:  Could not find table/view ALLERGIES in schema ECLINIC_KNG_TEST: line 1 col 30 (at pos 29)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 29 } 'INSERT INTO ECLINIC_KNG_TEST.ALLERGIES VALUES (\'11\',\'sulfa\',\'D\');'
+[2018-09-20T09:59:19.619] [INFO] hanatohana - Connected to SAP HANA DB: ECLINIC_KNG_NEW
+[2018-09-20T09:59:19.622] [INFO] hanatohana - Connected to SAP HANA DB: ECLINIC_KNG_TEST
