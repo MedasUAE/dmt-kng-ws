@@ -40,12 +40,13 @@ function loopInsert(){
          fs.readFile(rootFolder+"/"+ tableName,(err,fileData)=> {
 		 if(!fileData) return;
         const fileDataArray = fileData.toString().split("\n");
+       // const fileDataArray = fileData.toString().split(";");
         fileDataArray.forEach(async(insertQuery)=>{
 	    insertQuery =await replaceAll(insertQuery,",,",",null,"); 
 		insertQuery = await insertQuery.replace(",,", ",null,"); 
-        insertQuery = await insertQuery.replace("\g", "");
+        //insertQuery = await insertQuery.replace("\g", "");
         insertQuery = await insertQuery.replace(",)", ",null)");
-        if(insertQuery){ 		
+	   if(insertQuery){ 		
 			  hanaConTo.exec(insertQuery, function (err, affectedRow) {
                  if(err){
                        console.log(err,insertQuery);

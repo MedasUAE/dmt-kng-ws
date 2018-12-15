@@ -26,12 +26,10 @@ loopOnTables();
 
  async function loopOnTables(){
     console.time("Time")
-   let tables =await showTableNames();
+  // let tables =await showTableNames();
   
-//    let tables =[{'TABLE_NAME':'CONSULT_PROCEDURE_REQUEST'},
-// {'TABLE_NAME':'CONSULT_PROCEDURE'},
-// {'TABLE_NAME':'PROCEDURE_INSURAR'}];
-
+  // let tables =[{'TABLE_NAME':'SALERETURN_MASTER'},{'TABLE_NAME':'appointments'}, {'TABLE_NAME':'history_master'},{'TABLE_NAME':'TEST_DETAILS'},{'TABLE_NAME':'OFFICE_DETAILS'},{'TABLE_NAME':'HISTORY_ASSIGN'},{'TABLE_NAME':' refer_doctors'},{'TABLE_NAME':'BILL_GENERATED'}];
+   let tables =[{'TABLE_NAME':'ATTACHEDDOCUMENTS'},{'TABLE_NAME':'MODULE_PRIVLEGE_GRP'}];
    tables.forEach(async (tableNameObj) => {
      let rows= await getTableData(tableNameObj['TABLE_NAME']);
      createInsertQuery(tableNameObj['TABLE_NAME'],rows);

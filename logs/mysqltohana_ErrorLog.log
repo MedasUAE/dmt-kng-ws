@@ -1,0 +1,20 @@
+[2018-10-04T16:47:45.742] [INFO] mysqltohana - Coonected To Mysql DB: eclinic_ghi
+[2018-10-04T16:47:57.028] [INFO] mysqltohana - Connected to SAP HANA DB: ECLINIC_HMC_NEW
+[2018-10-04T16:48:35.336] [INFO] mysqltohana - Table created with name: complaint_setup successCount :1
+[2018-10-04T16:50:02.542] [INFO] mysqltohana - Inserted  data in table :complaint_setup  TableCount:1
+[2018-10-04T17:10:59.160] [INFO] mysqltohana - Coonected To Mysql DB: eclinic_ghi
+[2018-10-10T15:15:01.338] [INFO] mysqltohana - Coonected To Mysql DB: eclinic_ghi
+[2018-10-10T15:15:09.327] [INFO] mysqltohana - Connected to SAP HANA DB: ECLINIC_HMC_NEW
+[2018-10-10T15:17:04.953] [INFO] mysqltohana - Inserted  data in table :history_master  TableCount:1
+[2018-10-16T10:26:32.485] [INFO] mysqltohana - Connected to SAP HANA DB: ECLINIC_HMC_NEW
+[2018-10-16T10:26:53.263] [INFO] mysqltohana - Coonected To Mysql DB: eclinic_ghi
+[2018-10-16T10:27:15.608] [ERROR] mysqltohana - Trncate Failed { [Error: invalid table name: DDC_UPDATIONS: line 1 col 32 (at pos 31)]
+  message: 'invalid table name: DDC_UPDATIONS: line 1 col 32 (at pos 31)',
+  code: 259,
+  sqlState: 'HY000',
+  level: 1,
+  position: 31 } TRUNCATE TABLE ECLINIC_HMC_NEW.DDC_UPDATIONS
+[2018-10-16T10:28:05.593] [INFO] mysqltohana - Table created with name: ddc_updations successCount :1
+[2018-10-16T10:30:31.301] [INFO] mysqltohana - Coonected To Mysql DB: eclinic_ghi
+[2018-10-16T10:30:41.743] [INFO] mysqltohana - Connected to SAP HANA DB: ECLINIC_HMC_NEW
+[2018-10-16T10:30:59.994] [INFO] mysqltohana - Table created with name: ddc_updations successCount :1

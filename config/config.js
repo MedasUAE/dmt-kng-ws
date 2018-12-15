@@ -19,11 +19,12 @@ module.exports = {
       
     },
     hanadbto:{
-        host: process.env.HANA_DB_HOST || '192.168.0.240',
+        host: process.env.HANA_DB_HOST || '192.168.0.217',
         user: process.env.HANA_DB_USER || 'SYSTEM',
         password : process.env.HANA_DB_PSW || 'Medteam2013',
         port : process.env.HANA_DB_PORT || 39015, 
-        database:process.env.HANA_DB_NAME || 'ECLINIC_KNG_TEST'
+        //database:process.env.HANA_DB_NAME || 'ECLINIC_KNG_TEST'
+		 database:process.env.HANA_DB_NAME || 'ECLINIC_HMC_NEW'
     },
     tables:['allergies','tooth_code','container_setup']
    
